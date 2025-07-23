@@ -108,7 +108,6 @@ fun ProductManagementScreen(
                         text = "Productos",
                     )
 
-                    //Test Commit
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
