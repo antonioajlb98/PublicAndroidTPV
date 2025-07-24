@@ -1,6 +1,7 @@
 package com.antonioajlb.ui.presentation.product_management
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -35,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.antonioajlb.ui.presentation.product_management.composables.dialogs.CreateProductDialog
 import com.antonioajlb.ui.presentation.product_management.composables.dialogs.DeleteProductDialog
 import com.antonioajlb.utils.DeviceConfiguration
 import org.koin.androidx.compose.koinViewModel
@@ -57,8 +59,7 @@ fun ProductManagementScreen(
         DeviceConfiguration.TABLET_PORTRAIT -> TODO()
         DeviceConfiguration.TABLET_LANDSCAPE -> {
             Row(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Scaffold(
@@ -68,18 +69,17 @@ fun ProductManagementScreen(
                         .clip(RoundedCornerShape(24.dp))
                         .background(MaterialTheme.colorScheme.onSurface)
                         .padding(
-                            horizontal = 16.dp,
-                            vertical = 12.dp
+                            horizontal = 16.dp, vertical = 12.dp
                         )
                         .consumeWindowInsets(WindowInsets.systemBars),
                     topBar = {
-                        Row (
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(intrinsicSize = IntrinsicSize.Min),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
-                        ){
+                        ) {
                             Text(
                                 modifier = Modifier,
                                 style = MaterialTheme.typography.titleLarge,
@@ -115,18 +115,36 @@ fun ProductManagementScreen(
                         .clip(RoundedCornerShape(24.dp))
                         .background(MaterialTheme.colorScheme.onSurface)
                         .padding(
-                            horizontal = 16.dp,
-                            vertical = 12.dp
+                            horizontal = 16.dp, vertical = 12.dp
                         )
                 ) {
-                    Text(
-                        style = MaterialTheme.typography.titleLarge,
-                        text = "Productos",
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(intrinsicSize = IntrinsicSize.Min),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            modifier = Modifier,
+                            style = MaterialTheme.typography.titleLarge,
+                            text = "Productos",
+                        )
+                        Icon(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .aspectRatio(1f)
+                                .clip(CircleShape)
+                                .clickable {
+                                    viewModel.onEvent(ProductManagementScreenEvent.OpenCreateProductDialog)
+                                }
+                                .background(MaterialTheme.colorScheme.primary),
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = null)
+                    }
 
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         items(state.products) {
 
@@ -139,12 +157,20 @@ fun ProductManagementScreen(
         DeviceConfiguration.DESKTOP -> TODO()
 
     }
+
+    if (state.showCreateProductDialog) {
+        CreateProductDialog(
+            onDismissRequest = {
+                viewModel.onEvent(ProductManagementScreenEvent.CloseCreateProductDialog)
+            }
+        )
+    }
+
     state.productToDelete?.let { product ->
         DeleteProductDialog(
             product = product,
             onConfirm = { viewModel.onEvent(ProductManagementScreenEvent.DeleteProduct(product)) },
-            onDismissRequest = { viewModel.onEvent(ProductManagementScreenEvent.DismissDeleteProductConfirmation) }
-        )
+            onDismissRequest = { viewModel.onEvent(ProductManagementScreenEvent.DismissDeleteProductConfirmation) })
     }
 
 }

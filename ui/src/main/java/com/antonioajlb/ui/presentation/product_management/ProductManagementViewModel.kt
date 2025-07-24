@@ -28,7 +28,7 @@ class ProductManagementViewModel(
                 }
             }
 
-            is ProductManagementScreenEvent.InsertProduct -> {
+            is ProductManagementScreenEvent.CreateProduct -> {
                 launchInViewModelScope {
                     insertProductUseCase(event.product)
                         .onSuccess {
@@ -101,6 +101,17 @@ class ProductManagementViewModel(
                         .onFailure {
 
                         }
+                }
+            }
+
+            ProductManagementScreenEvent.CloseCreateProductDialog -> {
+                updateState {
+                    copy(showCreateProductDialog = false)
+                }
+            }
+            ProductManagementScreenEvent.OpenCreateProductDialog -> {
+                updateState {
+                    copy(showCreateProductDialog = true)
                 }
             }
         }
