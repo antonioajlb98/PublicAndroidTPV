@@ -1,25 +1,44 @@
+# .github/workflows/sync-to-public.yml
 name: Sync main to public
 on:
-  push: { branches: [main] }
+  push:
+    branches: [ main ]
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout private repo (sparse, sin workflows)
+      # 1) Clona TODO el repo privado, sin credenciales por defecto
+      - name: Checkout private repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           persist-credentials: false
-          sparse-checkout: |
-            /*
-            !/.github/workflows
 
+      # 2) Crea un branch temporal que herede de main
+      - name: Prepare mirror branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git checkout main
+          git branch -D public-mirror || true      # bórralo si existe de antes
+          git checkout -b public-mirror
+
+      # 3) Elimina la carpeta de workflows
+      - name: Remove workflows directory
+        run: |
+          rm -rf .github/workflows
+          git add -A
+          # Sólo habrá cambios si existe la carpeta. 
+          git diff --cached --quiet || git commit -m "chore: strip workflows for public"
+
+      # 4) Empuja ese branch al main del repo público
       - name: Push to public repo
         env:
           PUBLIC_REPO_PAT: ${{ secrets.PUBLIC_REPO_PAT }}
         run: |
           git remote add public \
             https://x-access-token:${PUBLIC_REPO_PAT}@github.com/antonioajlb98/PublicAndroidTPV.git
-          git push public main --force
+          git push public public-mirror:main --force
 
