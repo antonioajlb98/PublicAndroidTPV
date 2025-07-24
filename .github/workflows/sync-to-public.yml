@@ -1,28 +1,25 @@
 name: Sync main to public
-
 on:
-  push:
-    branches:
-      - main
+  push: { branches: [main] }
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout private repo
+      - name: Checkout private repo (sparse, sin workflows)
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          persist-credentials: false   # ⚠️ Importante: desactiva el GITHUB_TOKEN por defecto
+          persist-credentials: false
+          sparse-checkout: |
+            /*
+            !/.github/workflows
 
       - name: Push to public repo
         env:
           PUBLIC_REPO_PAT: ${{ secrets.PUBLIC_REPO_PAT }}
         run: |
-          # Añade el remoto 'public' usando tu PAT
           git remote add public \
             https://x-access-token:${PUBLIC_REPO_PAT}@github.com/antonioajlb98/PublicAndroidTPV.git
-          # Empuja forzando (o sin --force si prefieres fast‑forward)
           git push public main --force
 
