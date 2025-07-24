@@ -7,5 +7,6 @@ data class ProductManagementScreenState(
     val products: List<Product> = listOf(),
     val categories: List<Category> = listOf(),
     val productToDelete: Product? = null,
-    val productToUpdate: Product? = null
+    val productToUpdate: Product? = null,
+    val showCreateProductDialog: Boolean = false,
 )
